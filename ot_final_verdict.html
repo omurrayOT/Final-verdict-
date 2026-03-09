@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OT Board – Final Decision</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dark: #0e1117;
+    --navy: #0d1b2a;
+    --panel: #141c26;
+    --border: #1e3a50;
+    --accent: #c8a84b;
+    --green: #2dbe8f;
+    --red: #e05c3a;
+    --text: #cdd9e5;
+    --muted: #6b8299;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Animated background pulse on success */
+  body.success-bg {
+    animation: bgPulse 1.5s ease forwards;
+  }
+  @keyframes bgPulse {
+    0%   { background: var(--dark); }
+    40%  { background: #081a10; }
+    100% { background: #081a10; }
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 620px;
+    text-align: center;
+  }
+
+  /* Seal graphic */
+  .seal {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+    animation: rotateSeal 20s linear infinite;
+  }
+
+  .seal::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 1px dashed rgba(200,168,75,0.4);
+  }
+
+  .seal-inner {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  @keyframes rotateSeal {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .seal-inner { animation: rotateSeal 20s linear infinite reverse; }
+
+  .org-label {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 48px;
+    letter-spacing: 6px;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+  }
+
+  /* Input box */
+  .code-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 32px 36px;
+    margin-bottom: 0;
+    transition: border-color 0.3s;
+  }
+
+  .code-box.error { border-color: var(--red); animation: shake 0.4s ease; }
+  .code-box.correct { border-color: var(--green); }
+
+  .input-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+
+  .input-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .input-wrap::before {
+    content: '▶';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--accent);
+    pointer-events: none;
+  }
+
+  #codeInput {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--accent);
+    font-family: 'Bebas Neue', cursive;
+    font-size: 24px;
+    letter-spacing: 5px;
+    padding: 14px 16px 14px 38px;
+    outline: none;
+    text-transform: uppercase;
+    transition: border-color 0.2s;
+    text-align: center;
+  }
+
+  #codeInput:focus { border-color: var(--accent); }
+  #codeInput::placeholder {
+    color: var(--border);
+    font-size: 14px;
+    letter-spacing: 3px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    background: var(--accent);
+    color: var(--dark);
+    border: none;
+    padding: 14px;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 20px;
+    letter-spacing: 4px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-submit:hover {
+    background: #e0be6a;
+    box-shadow: 0 6px 24px rgba(200,168,75,0.3);
+    transform: translateY(-1px);
+  }
+
+  #errorMsg {
+    color: var(--red);
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: 14px;
+    min-height: 16px;
+  }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-8px)}
+    40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)}
+    80%{transform:translateX(5px)}
+  }
+
+  /* ── VERDICT REVEAL ── */
+  #verdict {
+    display: none;
+    animation: verdictReveal 1s ease forwards;
+    margin-top: 0;
+    width: 100%;
+    max-width: 620px;
+  }
+
+  #verdict.show { display: block; }
+
+  @keyframes verdictReveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .verdict-header {
+    background: var(--green);
+    padding: 18px 28px;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .verdict-header-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .verdict-header-text {
+    text-align: left;
+  }
+
+  .verdict-header-title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: #0a2b1f;
+    line-height: 1;
+  }
+
+  .verdict-header-sub {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(10,43,31,0.7);
+    margin-top: 3px;
+  }
+
+  .verdict-body {
+    background: rgba(45,190,143,0.04);
+    border: 1px solid var(--green);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 32px 36px;
+  }
+
+  .verdict-text {
+    font-family: 'Special Elite', cursive;
+    font-size: 15px;
+    line-height: 2;
+    color: #b8d8c8;
+    text-align: left;
+  }
+
+  .verdict-text strong {
+    color: #ffffff;
+  }
+
+  .verdict-divider {
+    height: 1px;
+    background: rgba(45,190,143,0.2);
+    margin: 20px 0;
+  }
+
+  .verdict-seal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .verdict-ref {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
+  .verdict-stamp {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--green);
+    border: 1.5px solid var(--green);
+    padding: 5px 12px;
+    border-radius: 2px;
+    opacity: 0.8;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+
+  /* confetti burst on reveal */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 200;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 34px; }
+    .code-box { padding: 24px 20px; }
+    .verdict-body { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="inputWrap">
+  <div class="seal"><div class="seal-inner">⚖</div></div>
+  <div class="org-label">State Occupational Therapy Licensure Board</div>
+  <h1>Final Board<br>Decision</h1>
+  <div class="subtitle">ENTER YOUR DECODED CIPHER CODE TO ACCESS THE VERDICT</div>
+
+  <div class="code-box" id="codeBox">
+    <div class="input-label">DECODED CIPHER CODE</div>
+    <div class="input-wrap">
+      <input id="codeInput" type="text" placeholder="ENTER CODE HERE" autocomplete="off">
+    </div>
+    <button class="btn-submit" onclick="submitCode()">Submit Code</button>
+    <div id="errorMsg"></div>
+  </div>
+</div>
+
+<!-- VERDICT -->
+<div id="verdict">
+  <div class="verdict-header">
+    <div class="verdict-header-icon">✔</div>
+    <div class="verdict-header-text">
+      <div class="verdict-header-title">Code Accepted — Verdict Unlocked</div>
+      <div class="verdict-header-sub">STATE OT LICENSURE BOARD  //  OFFICIAL DETERMINATION</div>
+    </div>
+  </div>
+  <div class="verdict-body">
+    <div class="verdict-text">
+      After reviewing your investigation, the Board has determined that the failures at the clinical site resulted from <strong>inadequate collaboration</strong> and <strong>poor adherence to scope, supervision, and ethical standards.</strong>
+      <div class="verdict-divider"></div>
+      Based on your performance today, you have demonstrated readiness for <strong>safe, intraprofessional practice.</strong>
+      <br><br>
+      The program remained <strong>accredited.</strong>
+      <br><br>
+      You may now <strong>enter clinical practice.</strong>
+    </div>
+    <div class="verdict-seal-row">
+      <div class="verdict-ref">REF: OT-BOARD-FINAL // CASE CLOSED</div>
+      <div class="verdict-stamp">CLEARED</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('codeInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitCode();
+  });
+
+  function submitCode() {
+    const val = document.getElementById('codeInput').value.trim().toUpperCase().replace(/\s+/g, ' ');
+    const box = document.getElementById('codeBox');
+
+    if (val === 'ETHICAL PRACTICE') {
+      box.classList.remove('error');
+      box.classList.add('correct');
+
+      // Hide input, show verdict
+      setTimeout(() => {
+        document.getElementById('inputWrap').style.display = 'none';
+        document.body.classList.add('success-bg');
+        const verdict = document.getElementById('verdict');
+        verdict.classList.add('show');
+        launchConfetti();
+      }, 300);
+
+    } else {
+      box.classList.remove('correct');
+      box.classList.add('error');
+      const err = document.getElementById('errorMsg');
+      err.textContent = 'Incorrect code. Check your decoded message and try again.';
+      setTimeout(() => {
+        box.classList.remove('error');
+        err.textContent = '';
+      }, 3000);
+    }
+  }
+
+  function launchConfetti() {
+    const colors = ['#c8a84b', '#2dbe8f', '#ffffff', '#e0be6a', '#a8d8c0'];
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = '-10px';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+      el.style.animationDelay = (Math.random() * 0.8) + 's';
+      el.style.width = el.style.height = (6 + Math.random() * 8) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+  }
+</script>
+
+</body>
+</html>
